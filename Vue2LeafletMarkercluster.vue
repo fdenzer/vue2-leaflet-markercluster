@@ -1,46 +1,53 @@
 <template>
-  <div>
-    <slot></slot>
+  <div style="display: none;">
+    <slot v-if="ready"></slot>
   </div>
 </template>
 
 <script>
-import L from 'leaflet'
-import 'leaflet.markercluster'
+import { MarkerClusterGroup } from 'leaflet.markercluster'
+import { findRealParent, propsBinder } from 'vue2-leaflet'
+import { DomEvent } from 'leaflet'
 
+const props = {
+  options: {
+    type: Object,
+    default() { return {}; },
+  },
+};
 
 export default {
-  props: [ 'options' ],
-  watch: {
-    options: function() {
-      this._remove()
-      this._add()
-    }
+  props,
+  data() {
+    return {
+      ready: false,
+    };
   },
-  mounted () {
-    this._add()
+  mounted() {
+    this.mapObject = new MarkerClusterGroup(this.options);
+    DomEvent.on(this.mapObject, this.$listeners);
+    propsBinder(this, this.mapObject, props);
+    this.ready = true;
+    this.parentContainer = findRealParent(this.$parent);
+    this.parentContainer.addLayer(this);
+    this.$nextTick(() => {
+      this.$emit('ready', this.mapObject);
+    });
   },
-  beforeDestroy () {
-    this._remove()
+  beforeDestroy() {
+    this.parentContainer.removeLayer(this);
   },
   methods: {
-    deferredMountedTo (parent) {
-      this.parent = parent
-      var that = this.mapObject
-      for (var i = 0; i < this.$children.length; i++) {
-        this.$children[i].deferredMountedTo(that)
-      }
-      this.mapObject.addTo(parent)
-    },
-    _remove () {
-      this.parent.removeLayer(this.mapObject)
-    },
-    _add () {
-      this.mapObject = L.markerClusterGroup(this.options)
-      if (this.$parent._isMounted) {
-        this.deferredMountedTo(this.$parent.mapObject)
+    addLayer(layer, alreadyAdded) {
+      if (!alreadyAdded) {
+        this.mapObject.addLayer(layer.mapObject);
       }
     },
+    removeLayer(layer, alreadyRemoved) {
+      if (!alreadyRemoved) {
+        this.mapObject.removeLayer(layer.mapObject);
+      }
+    }
   }
-}
+};
 </script>

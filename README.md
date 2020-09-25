@@ -17,7 +17,7 @@ This is a [markercluster plugin](https://github.com/Leaflet/Leaflet.markercluste
     npm install
     npm run example
 
-Then you should be able to bnavigate with your browser and see the demo in http://localhost:4000/
+Then you should be able to navigate with your browser and see the demo in http://localhost:4000/
 
 You can see the demo code in the file [example.vue](example.vue)
 
@@ -36,6 +36,14 @@ something like this
         </v-marker>
       </v-marker-cluster>
     </v-map>
+    
+if you want to set some options, use
+
+    <v-marker-cluster :options="{foo: 'bar'}">
+        .....
+    </v-marker-cluster>
+    
+See Leaflet doc : https://github.com/Leaflet/Leaflet.markercluster#all-options for all available options
 
 ### on &lt;script&gt; add
 
@@ -68,6 +76,21 @@ At main Vue configuration, this will make the component available to all templat
     @import "~leaflet.markercluster/dist/MarkerCluster.css";
     @import "~leaflet.markercluster/dist/MarkerCluster.Default.css";
 
+## Access markercluster layer directly
+
+If you need to access other markecluster methods, like [refreshClusters()](https://github.com/Leaflet/Leaflet.markercluster#refreshing-the-clusters-icon), you can do it with a ref on the markercluster vue element and using the `mapObject` property
+
+    ...
+    <v-marker-cluster ref="clusterRef">
+      ...
+    </v-marker-cluster>
+    ...
+
+    ...
+    this.$refs.clusterRef.mapObject.refreshClusters()
+    ...
+
+
 ## Develop and build
 
     npm install
@@ -80,6 +103,7 @@ At main Vue configuration, this will make the component available to all templat
 ### Contributors
 
  - [Ahmet Özışık](https://github.com/aozisik)
+ - [Nader Toukabri](https://nader.tech)
 
 ## License
 

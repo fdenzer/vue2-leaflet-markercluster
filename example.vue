@@ -2,8 +2,8 @@
   <v-map :zoom=10 :center="initialLocation">
     <v-icondefault></v-icondefault>
     <v-tilelayer url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"></v-tilelayer>
-    <v-marker-cluster :options="clusterOptions">
-      <v-marker v-for="l in locations" :lat-lng="l.latlng" :icon="icon">
+    <v-marker-cluster :options="clusterOptions" @clusterclick="click()" @ready="ready">
+      <v-marker v-for="l in locations" :key="l.id" :lat-lng="l.latlng" :icon="icon">
         <v-popup :content="l.text"></v-popup>
       </v-marker>
     </v-marker-cluster>
@@ -11,7 +11,8 @@
 </template>
 
 <script>
-  import Vue2Leaflet from 'vue2-leaflet'
+  import * as Vue2Leaflet from 'vue2-leaflet'
+  import { latLng, Icon, icon } from 'leaflet'
   import Vue2LeafletMarkercluster from './Vue2LeafletMarkercluster'
   import iconUrl from 'leaflet/dist/images/marker-icon.png'
   import shadowUrl from 'leaflet/dist/images/marker-shadow.png'
@@ -24,30 +25,35 @@
 
   export default {
     components: {
-      'v-map': Vue2Leaflet.Map,
-      'v-tilelayer': Vue2Leaflet.TileLayer,
-      'v-icondefault': Vue2Leaflet.IconDefault,
-      'v-marker': Vue2Leaflet.Marker,
-      'v-popup': Vue2Leaflet.Popup,
+      'v-map': Vue2Leaflet.LMap,
+      'v-tilelayer': Vue2Leaflet.LTileLayer,
+      'v-icondefault': Vue2Leaflet.LIconDefault,
+      'v-marker': Vue2Leaflet.LMarker,
+      'v-popup': Vue2Leaflet.LPopup,
       'v-marker-cluster': Vue2LeafletMarkercluster
+    },
+    methods: {
+      click: (e) => console.log("clusterclick", e),
+      ready: (e) => console.log('ready', e),
     },
     data () {
       let locations = []
       for (let i = 0; i < 100; i++) {
         locations.push({
-          latlng: window.L.latLng(rand(-34.9205), rand(-57.953646)),
+          id: i,
+          latlng: latLng(rand(-34.9205), rand(-57.953646)),
           text: 'Hola ' + i
         })
       }
-      let icon = window.L.icon(Object.assign({},
-        window.L.Icon.Default.prototype.options,
+      let customicon = icon(Object.assign({},
+        Icon.Default.prototype.options,
         {iconUrl, shadowUrl}
       ))
       return {
         locations,
-        icon,
+        icon: customicon,
         clusterOptions: {},
-        initialLocation: window.L.latLng(-34.9205, -57.953646)
+        initialLocation: latLng(-34.9205, -57.953646)
       }
     },
     mounted() {
@@ -63,9 +69,10 @@
 
 <style>
   @import "~leaflet/dist/leaflet.css";
-  html, body {
-    height: 100%
-  }
   @import "~leaflet.markercluster/dist/MarkerCluster.css";
   @import "~leaflet.markercluster/dist/MarkerCluster.Default.css";
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
 </style>
